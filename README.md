@@ -8,6 +8,8 @@ Une simulation narrative en français pour un ordinateur Windows relié à un pr
 
 Double-cliquez sur **launch.bat**. Après compilation, il ouvre `dist/PaloAlto.exe`. Le mode manuel fonctionne sans connexion Internet ni serveur.
 
+**Livraison vérifiée :** 25 tests Python réussis, partie complète avec quatre contrôleurs en local et sur Railway, interface mobile testée à trois largeurs, EXE construit et lancé. Le backend Railway est **arrêté après les essais**, sans déploiement actif ; redémarrez-le avant d'utiliser **launch-online.bat**. Voir [la preuve et la reprise](docs/RAILWAY.md).
+
 Pour lancer depuis les sources, utilisez Python 3.12 ou supérieur :
 
 ```powershell

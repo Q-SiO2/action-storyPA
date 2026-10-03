@@ -34,3 +34,7 @@ Le dossier voisin `paloalto-live` a été inspecté : il s'agit d'une applicatio
 ## Critères de fin
 
 Une partie manuelle et une partie WebSocket parcourent les quatre manches ; scores et transitions restent cohérents ; les téléphones ne connaissent pas les réponses des autres avant révélation ; le guide indique clairement les résultats réellement vérifiés et les limites des essais physiques/hébergés.
+
+## Réalisation vérifiée
+
+Les sept étapes sont réalisées. Les résultats détaillés et corrections figurent dans [VALIDATION.md](VALIDATION.md). Les tests locaux et hébergés ont réussi ; l'EXE Windows a été construit et lancé. Les captures montrent les écrans réels. Le service Railway dédié est conservé mais son déploiement actif a été retiré après validation, car le connecteur refusait zéro réplique ; voir [RAILWAY.md](RAILWAY.md).

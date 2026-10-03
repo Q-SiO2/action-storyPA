@@ -9,6 +9,7 @@
 - Vérification browser initiale via **agent-browser** : page non vide, formulaire utilisable, aucune erreur navigateur détectée.
 - `scripts/browser-check.cjs` a connecté **quatre vrais contextes Chromium** à l'application mobile. Largeurs 360, 390, 430 px ; sélection/verrouillage ; réouverture par l'animateur ; rechargement avec jeton de reprise ; analyses justes/fausses ; classement final avec égalité. Aucune erreur JavaScript/console et aucun débordement horizontal observé.
 - Treize captures Pygame, un accueil QR et quatre captures mobile sont fournis dans `docs/screenshots/`. Toutes les branches ont été rendues pour vérifier l'absence d'exception.
+- **EXE Windows construit et lancé**, avec fermeture automatique après 30 frames : code de sortie 0 et aucun message d'erreur dans le journal. Le JSON externe est fourni à côté de l'EXE.
 
 ## Corrections issues des essais
 
@@ -25,3 +26,9 @@ Ces résultats ne constituent pas un essai avec quatre téléphones physiques, u
 La dépendance Starlette affiche actuellement un avertissement de dépréciation concernant httpx dans TestClient. Il n'affecte pas le résultat des tests ni le transport en production ; le simulateur TCP complète ces tests en mémoire.
 
 Le statut des essais Railway et de l'arrêt du service est consigné séparément dans [RAILWAY.md](RAILWAY.md).
+
+## Résultats hébergés
+
+La simulation complète avec le vrai transport Pygame et quatre clients a été répétée sur le domaine Railway en **HTTPS/WSS**, avec le même score final [5, 5, 5, 0]. Les tests des quatre contextes Chromium ont également réussi sur le domaine public. Une inspection agent-browser de la page hébergée n'a détecté aucune erreur.
+
+Après les tests, le déploiement actif a été retiré. L'API et l'interface Railway confirment l'absence de déploiement actif ; l'endpoint public renvoie HTTP 404. Aucune utilisation continue du backend de ce jeu n'est laissée active.
