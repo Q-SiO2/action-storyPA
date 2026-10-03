@@ -11,11 +11,17 @@ import secrets
 import time
 
 from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 log = logging.getLogger("paloalto")
+log.setLevel(logging.INFO)
+if not log.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(levelname)s %(name)s %(message)s"))
+    log.addHandler(handler)
+    log.propagate = False
 ROOT = Path(__file__).resolve().parent
 app = FastAPI(title="Palo Alto — transport", docs_url=None, redoc_url=None)
 app.mount("/static", StaticFiles(directory=ROOT / "static"), name="static")
@@ -24,6 +30,42 @@ PHASES = {"TITLE", "INTRO", "SCENE", "DIALOGUE_VOTE_OPEN", "DIALOGUE_RESULTS",
           "ROUND_TRANSITION", "FINAL_SCOREBOARD", "SESSION_COMPLETE"}
 OPEN = {"DIALOGUE_VOTE_OPEN", "ANALYSIS_OPEN"}
 TTL = 3 * 60 * 60
+
+
+class BodyLimit:
+    """Bound JSON request bodies before parsing, including chunked uploads."""
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http" or scope["method"] not in ("POST", "PUT", "PATCH"):
+            return await self.app(scope, receive, send)
+        chunks = []
+        size = 0
+        while True:
+            message = await receive()
+            if message["type"] == "http.disconnect":
+                return
+            chunk = message.get("body", b"")
+            size += len(chunk)
+            if size > 16384:
+                return await JSONResponse({"detail": "Message trop volumineux."}, status_code=413)(scope, receive, send)
+            chunks.append(chunk)
+            if not message.get("more_body", False):
+                break
+        first = True
+
+        async def replay():
+            nonlocal first
+            if first:
+                first = False
+                return {"type": "http.request", "body": b"".join(chunks), "more_body": False}
+            return await receive()
+
+        await self.app(scope, replay, send)
+
+
+app.add_middleware(BodyLimit)
 
 
 class SessionSpec(BaseModel):

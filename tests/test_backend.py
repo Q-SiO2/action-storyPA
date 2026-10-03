@@ -136,3 +136,4 @@ def test_payload_validation_and_no_secret_leak(client):
     assert "presenter_token" not in json.dumps(info)
     assert session["presenter_token"] not in json.dumps(info)
     assert client.post("/api/sessions", json={"names": ["x"] * 5, "colors": COLORS}).status_code == 422
+    assert client.post("/api/sessions", content="x" * 20000, headers={"Content-Type": "application/json"}).status_code == 413
