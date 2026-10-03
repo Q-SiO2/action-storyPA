@@ -6,6 +6,8 @@
 
 Les appels à la vibration utilisent un enregistreur simulé dans Chromium ; ils ne prouvent pas une vibration physique. Les WAV sont validés et inclus dans l'EXE. Les niveaux des enceintes et l'intelligibilité dans la salle restent à vérifier. [Sources et contrôles](AUDIO_MOTION.md).
 
+EXE actualisé avec les huit WAV et leurs licences intégrés : lancement Windows pendant 30 frames, sortie 0, journal vide. ZIP portable actualisé avec les contrôles audio/mouvement et crédits. `build.bat` régénère également le ZIP.
+
 ## Résultats locaux
 
 - **25 tests Python réussis** : distributions 4–0–0, 3–1–0, 2–1–1 et 2–2 ; réponses invalides ; annulation/remplacement ; scores attribués une seule fois ; reprise de phase/manche ; clôture ; PIN ; refus de vol d'équipe ; reconnexion ; confidentialité ; identifiants de phase périmés ; instantanés de reprise.

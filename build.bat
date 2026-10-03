@@ -9,5 +9,7 @@ if not exist "dist\data" mkdir "dist\data"
 copy /y "data\scenarios.json" "dist\data\scenarios.json" >nul
 copy /y "launch.bat" "dist\launch.bat" >nul
 copy /y "launch-online.bat" "dist\launch-online.bat" >nul
+"%TASK_PYTHON%" scripts\package.py
+if errorlevel 1 exit /b 1
 echo EXE disponible : dist\PaloAlto.exe
 echo Scenario editable : dist\data\scenarios.json
