@@ -7,3 +7,4 @@ dist/
 .env
 .railway/
 node_modules/
+.audio-source/

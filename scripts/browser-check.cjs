@@ -93,6 +93,16 @@ async function run() {
               : { width: 430, height: 932 },
       });
       contexts.push(context);
+      await context.addInitScript(() => {
+        window.hapticCalls = [];
+        Object.defineProperty(navigator, "vibrate", {
+          value: (pattern) => {
+            window.hapticCalls.push(pattern);
+            return true;
+          },
+          configurable: true,
+        });
+      });
       const page = await context.newPage();
       pages.push(page);
       page.on("pageerror", (e) => errors.push(e.message));
@@ -100,6 +110,16 @@ async function run() {
         if (msg.type() === "error") errors.push(msg.text());
       });
       await page.goto(base + "/join?room=" + created.room_code);
+      assert(await page.getByRole("button", { name: "SON / OFF" }).isVisible());
+      if (team === 0) {
+        await page.getByRole("button", { name: "SON / OFF" }).click();
+        await page.getByRole("button", { name: "SON / ON" }).waitFor();
+        assert(await page.evaluate(() => audioContext.state === "running"));
+      }
+      if (team === 3) {
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await page.getByRole("button", { name: "EFFETS / CALME" }).waitFor();
+      }
       await page.getByRole("button", { name: "REJOINDRE LA SESSION" }).click();
       await page.getByRole("button", { name: new RegExp(names[team]) }).click();
       await page
@@ -135,6 +155,21 @@ async function run() {
         .nth(team === 3 ? 2 : 0)
         .click();
       assert((await page.locator(".option[aria-pressed=true]").count()) === 1);
+      assert(
+        (await page
+          .locator(".option[aria-pressed=true]")
+          .evaluate((node) => getComputedStyle(node).animationName)) ===
+          (team === 3 ? "none" : "selection-hop"),
+      );
+      if (team === 0) {
+        await page.locator(".option[aria-pressed=true]").focus();
+        await publish({}); // A repeated snapshot must preserve the actual focused node.
+        assert(
+          await page
+            .locator(".option[aria-pressed=true]")
+            .evaluate((node) => node === document.activeElement),
+        );
+      }
       if (team === 0)
         await page.screenshot({
           path: path.join(shots, "17-mobile-vote.png"),
@@ -142,6 +177,9 @@ async function run() {
         });
       await lock.click();
       await page.getByRole("heading", { name: "Choix verrouillé." }).waitFor();
+      assert(
+        (await page.evaluate(() => hapticCalls.length > 0)) === (team !== 3),
+      );
     }
     await wait(() =>
       messages.some(

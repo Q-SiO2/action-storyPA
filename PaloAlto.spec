@@ -1,6 +1,6 @@
 # One-file presenter, editable JSON copied alongside by build.bat.
 a = Analysis(['main.py'], pathex=[], binaries=[],
-             datas=[('data/scenarios.json', 'data')],
+             datas=[('data/scenarios.json', 'data'), ('assets/audio', 'assets/audio')],
              hiddenimports=[], hookspath=[], hooksconfig={},
              runtime_hooks=[], excludes=['pytest', 'fastapi', 'uvicorn', 'websockets'])
 pyz = PYZ(a.pure)

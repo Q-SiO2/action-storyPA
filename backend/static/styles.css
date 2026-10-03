@@ -78,7 +78,122 @@ header small {
   box-shadow: 0 0 14px #5cff8555;
 }
 section {
+  position: relative;
   padding-top: 31px;
+}
+.experience {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+.experience button {
+  min-height: 36px;
+  padding: 8px 12px;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+}
+.experience button[aria-pressed="true"] {
+  color: var(--accent);
+  border-color: #345164;
+}
+button:active:not(:disabled) {
+  transform: translateY(2px);
+}
+.selection-hop {
+  animation: selection-hop 350ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+.digital-enter {
+  animation: screen-enter 320ms ease-out;
+}
+.digital-enter::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  inset: 24px 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  animation: packet-sweep 420ms ease-out;
+}
+.nudge {
+  animation: nudge 240ms ease-out;
+}
+.result {
+  animation: score-pop 440ms cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+.rank {
+  animation: screen-enter 400ms ease-out both;
+}
+.rank:nth-of-type(2) {
+  animation-delay: 60ms;
+}
+.rank:nth-of-type(3) {
+  animation-delay: 120ms;
+}
+.rank:nth-of-type(4) {
+  animation-delay: 180ms;
+}
+@keyframes selection-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-6px);
+  }
+  72% {
+    transform: translateY(1px);
+  }
+}
+@keyframes screen-enter {
+  from {
+    opacity: 0.35;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes packet-sweep {
+  0% {
+    opacity: 0.5;
+    transform: scaleX(0.1);
+    transform-origin: left;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+}
+@keyframes nudge {
+  25% {
+    transform: translateX(-3px);
+  }
+  65% {
+    transform: translateX(3px);
+  }
+}
+@keyframes score-pop {
+  from {
+    opacity: 0.3;
+    transform: translateY(8px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.quiet-motion *,
+.quiet-motion *:before,
+.quiet-motion *:after {
+  animation: none !important;
+  transition: none !important;
+}
+.quiet-motion button:active {
+  transform: none;
 }
 .eyebrow {
   font-size: 11px;
@@ -366,6 +481,9 @@ footer {
   *:after {
     animation: none !important;
     transition: none !important;
+  }
+  button:active {
+    transform: none;
   }
 }
 @media (max-width: 374px) {

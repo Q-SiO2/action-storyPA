@@ -16,6 +16,95 @@ let room = new URLSearchParams(location.search).get("room") || "",
   lastSeen = Date.now(),
   retryTimer,
   heartbeat;
+// Phones start silent so four controllers do not compete with the projector.
+const motionQuery = matchMedia("(prefers-reduced-motion: reduce)");
+let quietMotion = false,
+  soundEnabled = false,
+  audioContext = null,
+  lastScreen = "",
+  hopping = null,
+  lastSnapshot = "";
+try {
+  quietMotion = localStorage.getItem("palo:quiet-motion") === "true";
+} catch {}
+function reducedMotion() {
+  return quietMotion || motionQuery.matches;
+}
+function preferences() {
+  document.documentElement.classList.toggle("quiet-motion", reducedMotion());
+  const motion = document.querySelector("#motion-toggle");
+  motion.textContent = "EFFETS / " + (reducedMotion() ? "CALME" : "ON");
+  motion.setAttribute("aria-pressed", String(!reducedMotion()));
+  const sound = document.querySelector("#sound-toggle");
+  sound.textContent = "SON / " + (soundEnabled ? "ON" : "OFF");
+  sound.setAttribute("aria-pressed", String(soundEnabled));
+}
+motionQuery.addEventListener("change", preferences);
+document.querySelector("#motion-toggle").onclick = () => {
+  quietMotion = !quietMotion;
+  try {
+    localStorage.setItem("palo:quiet-motion", String(quietMotion));
+  } catch {}
+  preferences();
+};
+document.querySelector("#sound-toggle").onclick = async () => {
+  if (soundEnabled) {
+    soundEnabled = false;
+    preferences();
+    return;
+  }
+  try {
+    const AudioClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioClass) return;
+    audioContext ||= new AudioClass();
+    await audioContext.resume();
+    soundEnabled = audioContext.state === "running";
+    preferences();
+    cue("select");
+  } catch {
+    soundEnabled = false;
+    preferences();
+  }
+};
+preferences();
+function cue(kind) {
+  if (!soundEnabled || audioContext?.state !== "running") return;
+  // Short synthesized phone pips; volume envelope prevents clicks.
+  const now = audioContext.currentTime;
+  const tones = kind === "lock" ? [740, 1110] : [kind === "select" ? 620 : 330];
+  tones.forEach((frequency, i) => {
+    const oscillator = audioContext.createOscillator(),
+      gain = audioContext.createGain();
+    const start = now + i * 0.065;
+    oscillator.type = "sine";
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(0.045, start + 0.006);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.055);
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start(start);
+    oscillator.stop(start + 0.06);
+    oscillator.onended = () => {
+      oscillator.disconnect();
+      gain.disconnect();
+    };
+  });
+}
+function haptic(pattern) {
+  if (reducedMotion() || !navigator.vibrate) return;
+  try {
+    navigator.vibrate(pattern);
+  } catch {}
+}
+function enterScreen(key) {
+  if (key === lastScreen) return;
+  lastScreen = key;
+  if (reducedMotion()) return;
+  view.classList.remove("digital-enter");
+  void view.offsetWidth;
+  view.classList.add("digital-enter");
+}
 function el(tag, cls, value) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
@@ -35,6 +124,11 @@ function art() {
 }
 function message(value) {
   feedback.textContent = value || "";
+  if (value) {
+    feedback.classList.remove("nudge");
+    void feedback.offsetWidth;
+    feedback.classList.add("nudge");
+  }
 }
 function connection(online) {
   dot.classList.toggle("online", online);
@@ -56,6 +150,8 @@ async function api(path, body) {
   return json;
 }
 function join() {
+  lastSnapshot = "";
+  enterScreen("join");
   clearTimeout(retryTimer);
   clearInterval(heartbeat);
   state = null;
@@ -103,6 +199,7 @@ function join() {
 }
 async function teams() {
   const info = await api("/api/rooms/" + room);
+  enterScreen("teams:" + room);
   view.replaceChildren();
   add("p", "eyebrow", "SESSION / " + room);
   add("h1", "", "Choisissez votre équipe.");
@@ -130,6 +227,8 @@ async function teams() {
     );
     btn.disabled = occupied;
     btn.addEventListener("click", async () => {
+      cue("select");
+      haptic(10);
       if (info.requires_pin && !saved) {
         pinForm(i, info);
         return;
@@ -181,6 +280,7 @@ async function claim(i, pin, saved) {
   }
 }
 function waiting(title, detail) {
+  enterScreen(title);
   view.replaceChildren();
   const box = add("div", "waiting");
   box.append(
@@ -193,6 +293,7 @@ function waiting(title, detail) {
   box.append(el("span", "cursor"));
 }
 function connect() {
+  lastSnapshot = "";
   clearTimeout(retryTimer);
   clearInterval(heartbeat);
   connection(false);
@@ -236,6 +337,21 @@ function connect() {
     connection(true);
     retry = 0;
     message("");
+    const confirmed =
+      pending &&
+      state?.phase_id === data.phase_id &&
+      !state?.own_answer &&
+      data.own_answer;
+    if (confirmed) {
+      cue("lock");
+      haptic([12, 35, 18]);
+    }
+    if (
+      state &&
+      state.phase_id !== data.phase_id &&
+      ["ANALYSIS_RESULTS", "FINAL_SCOREBOARD"].includes(data.phase)
+    )
+      cue("reveal");
     if (!state || state.phase_id !== data.phase_id) {
       selected = null;
       pending = false;
@@ -244,6 +360,11 @@ function connect() {
     }
     state = data;
     sessionId = data.session_id;
+    // Ignore heartbeat and other teams' locks: keep focus and animations stable.
+    const { revision, connected, locked, ...visible } = data;
+    const signature = JSON.stringify(visible);
+    if (signature === lastSnapshot) return;
+    lastSnapshot = signature;
     render();
   };
   ws.onclose = (e) => {
@@ -294,6 +415,15 @@ function closed() {
   btn.onclick = join;
 }
 function render() {
+  enterScreen(
+    state.phase_id +
+      ":" +
+      state.phase +
+      ":" +
+      state.mode +
+      ":" +
+      Boolean(state.own_answer),
+  );
   const own = state.team;
   identity.hidden = false;
   identity.style.setProperty("--accent", state.colors[own]);
@@ -333,11 +463,17 @@ function render() {
     for (const option of state.options) {
       const b = add("button", "option");
       b.setAttribute("aria-pressed", String(selected === option.id));
+      if (hopping === option.id) b.classList.add("selection-hop");
       b.append(el("span", "key", option.id), el("span", "label", option.text));
       b.disabled = pending;
       b.addEventListener("click", () => {
+        if (selected === option.id) return;
         selected = option.id;
+        hopping = option.id;
+        cue("select");
+        haptic(10);
         render();
+        hopping = null;
       });
     }
     const lock = add(

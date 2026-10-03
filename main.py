@@ -14,13 +14,15 @@ from src.network import PresenterNetwork
 from src.renderer import Renderer, SIZE
 from src.scenario_loader import load_scenario, ScenarioError
 from src.ui_components import font
+from src.audio import Audio
+from src.feedback import Feedback
 
 ROOT = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
 EXTERNAL = Path(sys.executable).parent if getattr(sys, "frozen", False) else ROOT
 
 
 class Application:
-    def __init__(self, scenario, *, windowed=False, server_url="", error=None):
+    def __init__(self, scenario, *, windowed=False, server_url="", error=None, muted=False, reduced_motion=False):
         pygame.display.init()
         pygame.font.init()
         font.cache_clear()
@@ -31,6 +33,9 @@ class Application:
                                                pygame.FULLSCREEN if self.fullscreen else pygame.RESIZABLE)
         self.renderer = Renderer()
         self.game = Game(scenario)
+        self.audio = Audio(ROOT, muted=muted)
+        self.feedback = Feedback(self.game, self.audio)
+        self.reduced_motion = reduced_motion
         self.error = error
         self.server_url = server_url
         self.network = None
@@ -47,6 +52,14 @@ class Application:
         self.running = True
         self.last_revision = self.game.revision
         self.last_phase = self.game.phase
+
+    @property
+    def motion_time(self):
+        return 0 if self.reduced_motion else self.time
+
+    @property
+    def visual_phase_time(self):
+        return 1000 if self.reduced_motion else self.phase_time
 
     def start_network(self, fresh=False):
         if self.game.phase not in (Phase.TITLE, Phase.TRANSITION):
@@ -81,7 +94,7 @@ class Application:
             duration = 1.1
         else:
             duration = 0
-        if self.phase_time < duration:
+        if not self.reduced_motion and self.phase_time < duration:
             self.phase_time = duration + 0.1
             return
         g.advance()
@@ -155,6 +168,10 @@ class Application:
             self.hud = not self.hud
         elif key == pygame.K_p:
             self.paused = not self.paused
+        elif key == pygame.K_m:
+            self.audio.toggle()
+        elif key == pygame.K_F3:
+            self.reduced_motion = not self.reduced_motion
         elif key == pygame.K_F4:
             if g.switch_mode() and g.mode == "ONLINE":
                 self.start_network()
@@ -236,6 +253,7 @@ class Application:
                 self.timer = max(0, self.timer - dt)
         if self.network and not self.error:
             self.network.publish(g.snapshot())
+        self.feedback.update(self, dt)
 
     def draw(self):
         image = self.renderer.draw(self)
@@ -271,6 +289,7 @@ class Application:
         finally:
             if self.network:
                 self.network.stop()
+            self.audio.stop()
             pygame.quit()
 
 
@@ -280,6 +299,8 @@ def main():
     parser.add_argument("--scenario", type=Path, help="Autre fichier JSON")
     parser.add_argument("--server", default=os.getenv("PALO_ALTO_SERVER_URL", ""), help="Backend HTTP(S)")
     parser.add_argument("--smoke-frames", type=int, help=argparse.SUPPRESS)
+    parser.add_argument("--mute", action="store_true", help="Démarrer sans son")
+    parser.add_argument("--reduced-motion", action="store_true", help="Désactiver les animations")
     args = parser.parse_args()
     logging.basicConfig(filename=EXTERNAL / "presenter.log", level=logging.WARNING, encoding="utf-8")
     editable = EXTERNAL / "data" / "scenarios.json"
@@ -290,7 +311,8 @@ def main():
     except ScenarioError as exc:
         error = str(exc)
         scenario = {"title": "Configuration", "rounds": [], "subtitle": ""}
-    Application(scenario, windowed=args.windowed, server_url=args.server, error=error).run(args.smoke_frames)
+    Application(scenario, windowed=args.windowed, server_url=args.server, error=error,
+                muted=args.mute, reduced_motion=args.reduced_motion).run(args.smoke_frames)
 
 
 if __name__ == "__main__":

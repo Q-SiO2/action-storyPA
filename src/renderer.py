@@ -73,6 +73,7 @@ class Renderer:
             self.end(app)
         self.teams(app)
         self.footer(app)
+        self.digital_transition(app)
         if app.hud:
             panel(s, (1090, 175, 444, 129), GRAY, True)
             text(s, "HUD ANIMATEUR / ÉCRAN PUBLIC", (1110, 188), 19, AMBER, mono=True)
@@ -87,11 +88,28 @@ class Renderer:
         if app.menu:
             self.menu(app)
         # Short entrance fade. Skipping via SPACE sets phase_time above this interval.
-        if app.phase_time < 0.20 and not app.menu:
+        if app.visual_phase_time < 0.20 and not app.menu:
             veil = pygame.Surface(SIZE, pygame.SRCALPHA)
-            veil.fill((*BG, int((1 - app.phase_time / 0.20) * 180)))
+            veil.fill((*BG, int((1 - app.visual_phase_time / 0.20) * 180)))
             s.blit(veil, (0, 0))
         return s
+
+    def digital_transition(self, app):
+        """420 ms packet sweep, bounded to the content edges; no bright flashes."""
+        t = app.feedback.clock - app.feedback.transition_at
+        if app.reduced_motion or app.game.phase == Phase.SETUP or not 0 <= t < 0.42:
+            return
+        p = t / 0.42
+        layer = pygame.Surface(SIZE, pygame.SRCALPHA)
+        x = 68 + int(1466 * (1 - (1 - p) ** 3))
+        for row in range(9):
+            y = 209 + row * 56
+            length = 12 + (row * 29) % 70
+            pygame.draw.rect(layer, (*CYAN, int(95 * (1 - p))), (x - length, y, length, 2))
+        for column in range(24):
+            if column / 24 <= p:
+                pygame.draw.rect(layer, (*CYAN, int(125 * (1 - p))), (68 + column * 62, 727, 43, 2))
+        self.surface.blit(layer, (0, 0))
 
     def eyebrow(self, label, color=CYAN):
         text(self.surface, label.upper(), (68, 203), 23, color, mono=True)
@@ -110,7 +128,7 @@ class Renderer:
             panel(s, (x, y, 712, 113), c, app.setup_index == i)
             text(s, f"0{i + 1}", (x + 22, y + 17), 24, c, mono=True)
             text(s, "ÉQUIPE", (x + 80, y + 18), 18, GRAY, mono=True)
-            value = name + ("_" if app.setup_index == i and int(app.time * 2) % 2 == 0 else "")
+            value = name + ("_" if app.setup_index == i and int(app.motion_time * 2) % 2 == 0 else "")
             text(s, value, (x + 80, y + 47), 35, WHITE)
         text(s, "TAB / ↑ ↓  changer d'équipe     ·     24 caractères maximum", (68, 675), 23, GRAY, mono=True)
 
@@ -131,7 +149,7 @@ class Renderer:
         if app.network and app.network.session and g.mode == "ONLINE":
             self.lobby(app)
         else:
-            signal(s, (1174, 408), 290, app.time)
+            signal(s, (1174, 408), 290, app.motion_time)
             text(s, "CANAL // INTERACTION HUMAINE", (966, 665), 22, DIM, mono=True)
         if app.network and g.mode == "ONLINE":
             text(s, f"BACKEND : {'OK' if app.network.health_ok else 'TEST…'}   WEBSOCKET : {'OK' if app.network.socket_ok else 'TEST…'}", (70, 709), 19, GREEN if app.network.socket_ok else AMBER, mono=True)
@@ -180,9 +198,9 @@ class Renderer:
         color = pygame.Color(g.scenario["characters"][line["speaker"]])
         text(s, line["speaker"].upper(), (104, 366), 28, color, mono=True, bold=True)
         text(s, f"FLUX / {g.line_index + 1:02d} — {len(g.lines):02d}", (1242, 369), 21, DIM, mono=True)
-        amount = int(app.phase_time * g.scenario["timing"]["characters_per_second"])
+        amount = int(app.visual_phase_time * g.scenario["timing"]["characters_per_second"])
         displayed = line["text"][:amount]
-        cursor = " ▌" if int(app.time * 2) % 2 == 0 and amount < len(line["text"]) else ""
+        cursor = " ▌" if int(app.motion_time * 2) % 2 == 0 and amount < len(line["text"]) else ""
         size = 45
         while len(wrapped(line["text"], size, 1285)) > 4 and size > 30:
             size -= 1
@@ -228,7 +246,7 @@ class Renderer:
         c = AMBER if tied else CYAN
         self.eyebrow("Conflit de vote / départage animateur" if tied else "Décisions dévoilées", c)
         self.heading("Égalité détectée." if tied else "Le chemin se dessine.", c)
-        ease = min(1, app.phase_time / 0.8)
+        ease = min(1, app.visual_phase_time / 0.8)
         for i, key in enumerate("ABC"):
             y = 352 + i * 108
             text(s, key, (73, y), 46, c if key in g.tied else GRAY, mono=True)
@@ -258,8 +276,8 @@ class Renderer:
         ax = " + ".join(f"0{a}" for a in g.analysis["axioms"])
         text(s, f"AXIOMES / {ax}", (70, 689), 24, CYAN, mono=True)
         # Thin signal sweep provides reveal emphasis without flashing the whole screen.
-        if app.phase_time < 0.65:
-            x = int(app.phase_time / 0.65 * 1460) + 70
+        if app.visual_phase_time < 0.65:
+            x = int(app.visual_phase_time / 0.65 * 1460) + 70
             pygame.draw.line(s, GREEN, (x, 301), (x, 669), 2)
 
     def transition(self, app):
@@ -268,7 +286,7 @@ class Renderer:
         text(s, f"0{g.round_index + 1}", (60, 262), 132, DIM, mono=True, bold=True)
         text(s, "Signal décodé.", (322, 283), 70, WHITE, bold=True)
         text(s, "La conversation continue.", (326, 374), 38, GRAY)
-        signal(s, (1181, 431), 230, app.time, 0.8)
+        signal(s, (1181, 431), 230, app.motion_time, 0.8)
         text(s, f"> PROCHAIN NŒUD / 0{g.round_index + 2}", (72, 541), 32, CYAN, mono=True)
         text(s, g.scenario["rounds"][g.round_index + 1]["title"], (72, 601), 38, WHITE)
         text(s, "ESPACE pour poursuivre  ·  F4 pour changer de mode", (72, 680), 26, GRAY)
@@ -278,7 +296,7 @@ class Renderer:
         self.eyebrow("Session complète", GREEN)
         self.heading("Vous avez décodé la conversation.")
         ordered = sorted(range(4), key=lambda i: -g.scores[i])
-        ease = min(1, app.phase_time / 1.1)
+        ease = min(1, app.visual_phase_time / 1.1)
         for order, team in enumerate(ordered):
             score = g.scores[team]
             rank = 1 + sum(value > score for value in g.scores)
@@ -294,17 +312,19 @@ class Renderer:
 
     def end(self, app):
         s = self.surface
-        signal(s, (1199, 420), 262, app.time, 0.7)
+        signal(s, (1199, 420), 262, app.motion_time, 0.7)
         self.eyebrow("Transmission terminée", GREEN)
         text(s, "Communication", (62, 285), 77, WHITE, bold=True)
         text(s, "analysée.", (62, 374), 77, CYAN, bold=True)
-        text(s, "> RETOUR À LA CONFÉRENCE" + ("_" if int(app.time * 2) % 2 == 0 else ""), (70, 550), 32, GREEN, mono=True)
+        text(s, "> RETOUR À LA CONFÉRENCE" + ("_" if int(app.motion_time * 2) % 2 == 0 else ""), (70, 550), 32, GREEN, mono=True)
         text(s, "Merci aux quatre équipes.", (70, 629), 30, GRAY)
 
     def teams(self, app):
         s, g = self.surface, app.game
         for i, name in enumerate(g.names):
             x, y, c = 68 + i * 373, 745, TEAM_COLORS[i]
+            dx, dy = app.feedback.card_offset(i, app.reduced_motion)
+            x, y = x + dx, y + dy
             active = g.selected_team == i or (g.phase == Phase.SETUP and app.setup_index == i)
             panel(s, (x, y, 349, 83), c, active)
             text(s, f"0{i + 1}", (x + 15, y + 13), 19, c, mono=True)
@@ -322,7 +342,7 @@ class Renderer:
             else:
                 if g.phase == Phase.ANALYSIS_REVEAL:
                     award = g.awards[i]
-                    shown = g.scores[i] - award + round(award * min(1, app.phase_time / 0.8))
+                    shown = g.scores[i] - award + round(award * min(1, app.visual_phase_time / 0.8))
                     text(s, "RÉP. " + g.answers.get(i, "—"), (x + 52, y + 48), 19, c, mono=True)
                     text(s, f"{shown} PTS", (x + 183, y + 48), 19, GRAY, mono=True)
                     text(s, f"+{award}" if award else "×", (x + 278, y + 39), 31, GREEN if award else RED, mono=True)
@@ -334,7 +354,9 @@ class Renderer:
     def footer(self, app):
         s = self.surface
         pygame.draw.line(s, (32, 43, 57), (68, 845), (1534, 845))
-        text(s, "ESPACE  continuer     F1  aide     F11  plein écran", (70, 861), 19, GRAY, mono=True)
+        sound = "OFF" if app.audio.muted else "ON" if app.audio.available else "N/D"
+        motion = "CALME" if app.reduced_motion else "ON"
+        text(s, f"ESPACE continuer   F1 aide   M son {sound}   F3 effets {motion}   F11 plein écran", (70, 861), 18, GRAY, mono=True)
         text(s, "PALO ALTO / LES SIGNAUX FAIBLES", (1190, 861), 17, DIM, mono=True)
 
     def shade(self):
@@ -345,7 +367,7 @@ class Renderer:
     def help(self):
         self.shade()
         s = self.surface
-        panel(s, (263, 145, 1074, 608), CYAN, True)
+        panel(s, (263, 125, 1074, 665), CYAN, True)
         text(s, "CONSOLE / AIDE ANIMATEUR", (299, 169), 35, CYAN, mono=True)
         rows = [
             ("ESPACE / ENTRÉE", "Finir l'animation, puis continuer"),
@@ -354,14 +376,15 @@ class Renderer:
             ("RETOUR ARRIÈRE", "Annuler / rouvrir la dernière réponse"),
             ("F4 / N", "Manuel ↔ en ligne / test ou nouvelle connexion"),
             ("T / P", "Lancer ou arrêter le chrono / pause"),
+            ("M / F3", "Son / réduire les animations"),
             ("R / ÉCHAP", "Menu de reprise / confirmation de sortie"),
             ("F2 / F11 / F1", "HUD public / plein écran / fermer cette aide"),
         ]
         for i, (key, description) in enumerate(rows):
-            y = 242 + i * 57
+            y = 230 + i * 55
             text(s, key, (304, y), 24, CYAN, mono=True)
             text(s, description, (633, y), 25, WHITE)
-        text(s, "Aucune bonne réponse n'est montrée dans le HUD.", (304, 709), 23, GRAY)
+        text(s, "Aucune bonne réponse n'est montrée dans le HUD.", (304, 742), 23, GRAY)
 
     def menu(self, app):
         self.shade()

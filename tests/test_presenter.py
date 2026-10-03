@@ -22,6 +22,20 @@ def press(app, key, unicode=""):
     app.update(0)
 
 
+def test_mute_reduced_motion_and_immediate_text_advance(app):
+    app.game.enter(Phase.SCENE)
+    app.update(0)
+    press(app, pygame.K_m)
+    assert app.audio.muted
+    press(app, pygame.K_F3)
+    assert app.reduced_motion and app.visual_phase_time >= 1000
+    assert app.motion_time == 0
+    app.renderer.draw(app)
+    before = app.game.line_index
+    press(app, pygame.K_SPACE)
+    assert app.game.line_index > before or app.game.phase != Phase.SCENE
+
+
 def test_actual_keyboard_full_game(app):
     for _ in range(4):
         press(app, pygame.K_RETURN)

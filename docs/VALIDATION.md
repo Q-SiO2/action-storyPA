@@ -1,5 +1,11 @@
 # Validation observée — 3 octobre 2026
 
+## Extension audio et animations
+
+**30 tests Python réussis** après l'ajout audio/mouvement. La simulation TCP locale conserve les scores `[5,5,5,0]`. Les quatre contrôleurs Chromium passent à 360/390/430 px, avec activation Web Audio, animation de sélection, confirmation, réouverture, rechargement, focus conservé et mouvement réduit. Aucune erreur console/JavaScript ni débordement horizontal. Le rendu de toutes les branches et une capture GIF des vrais frames du présentateur sont générés.
+
+Les appels à la vibration utilisent un enregistreur simulé dans Chromium ; ils ne prouvent pas une vibration physique. Les WAV sont validés et inclus dans l'EXE. Les niveaux des enceintes et l'intelligibilité dans la salle restent à vérifier. [Sources et contrôles](AUDIO_MOTION.md).
+
 ## Résultats locaux
 
 - **25 tests Python réussis** : distributions 4–0–0, 3–1–0, 2–1–1 et 2–2 ; réponses invalides ; annulation/remplacement ; scores attribués une seule fois ; reprise de phase/manche ; clôture ; PIN ; refus de vol d'équipe ; reconnexion ; confidentialité ; identifiants de phase périmés ; instantanés de reprise.
