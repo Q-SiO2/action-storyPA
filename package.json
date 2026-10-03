@@ -1,0 +1,10 @@
+{
+  "name": "palo-alto-visual-verification",
+  "private": true,
+  "scripts": {
+    "test:mobile": "node scripts/browser-check.cjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
+  }
+}

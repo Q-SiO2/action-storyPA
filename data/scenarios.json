@@ -1,0 +1,406 @@
+{
+  "title": "Les signaux faibles",
+  "subtitle": "Trois voix. Quatre équipes. Une conversation à décoder.",
+  "characters": {
+    "Nora": "#33E6FF",
+    "Adam": "#FF4FD8",
+    "Lina": "#5CFF85",
+    "Narrateur": "#A7B2C2"
+  },
+  "timing": {
+    "dialogue_seconds": 10,
+    "analysis_seconds": 10,
+    "characters_per_second": 70
+  },
+  "axioms": {
+    "1": "On ne peut pas ne pas communiquer.",
+    "2": "Toute communication présente deux aspects : le contenu et la relation.",
+    "3": "La nature d'une relation dépend de la ponctuation des séquences de communication entre les partenaires.",
+    "4": "La communication humaine utilise les modes digital et analogique.",
+    "5": "Les interactions peuvent être symétriques ou complémentaires."
+  },
+  "rounds": [
+    {
+      "id": 1,
+      "title": "Le message sans réponse",
+      "location": "Salle de travail · 16 h 10",
+      "skill": "Détection",
+      "points": 1,
+      "prompt": "Que répond Adam ?",
+      "intro": [
+        {
+          "speaker": "Narrateur",
+          "text": "La veille d'un exposé, Nora, Adam et Lina se retrouvent pour terminer leurs diapositives."
+        },
+        {
+          "speaker": "Nora",
+          "text": "Adam, tu n'as pas répondu au groupe hier. On ne savait pas si tu venais."
+        }
+      ],
+      "choices": {
+        "A": {
+          "text": "Adam garde le silence et détourne le regard.",
+          "branch": [
+            {
+              "speaker": "Narrateur",
+              "text": "Adam baisse les yeux et fait glisser son téléphone dans sa poche."
+            },
+            {
+              "speaker": "Nora",
+              "text": "Bon… ton silence me donne l'impression que tu ne veux pas en parler."
+            }
+          ],
+          "analysis": {
+            "question": "Quel axiome est principalement visible dans cet échange ?",
+            "answers": [
+              "On ne peut pas ne pas communiquer",
+              "Contenu et relation",
+              "Ponctuation des séquences"
+            ],
+            "correct": 1,
+            "label": "Même le silence fait signe",
+            "axioms": [1],
+            "explanation": "L'absence de mots est interprétée par Nora. Le silence et le regard participent à la communication."
+          }
+        },
+        "B": {
+          "text": "Je viens, mais tu me parles comme si je devais te rendre des comptes.",
+          "branch": [
+            {
+              "speaker": "Adam",
+              "text": "Je viens, mais tu me parles comme si je devais te rendre des comptes."
+            },
+            {
+              "speaker": "Nora",
+              "text": "Je voulais juste savoir si on pouvait compter sur toi."
+            }
+          ],
+          "analysis": {
+            "question": "Quel aspect Adam remet-il principalement en question ?",
+            "answers": [
+              "Le contenu du planning",
+              "La relation exprimée par le message",
+              "Une absence de communication"
+            ],
+            "correct": 2,
+            "label": "Contenu / relation",
+            "axioms": [2],
+            "explanation": "Adam répond à la position que le message lui attribue, au-delà de l'information demandée. Il conteste la relation."
+          }
+        },
+        "C": {
+          "text": "Je ne réponds plus parce que tu me relances tout le temps.",
+          "branch": [
+            {
+              "speaker": "Adam",
+              "text": "Je ne réponds plus parce que tu me relances tout le temps."
+            },
+            {
+              "speaker": "Nora",
+              "text": "Et moi, je te relance parce que tu ne réponds jamais !"
+            }
+          ],
+          "analysis": {
+            "question": "Quel axiome explique ce cercle de réactions ?",
+            "answers": [
+              "Digital et analogique",
+              "Interaction complémentaire",
+              "Ponctuation des séquences"
+            ],
+            "correct": 3,
+            "label": "Qui a commencé ?",
+            "axioms": [3],
+            "explanation": "Chacun situe le début de la séquence chez l'autre : Adam voit son silence comme une réaction, Nora aussi ses relances."
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Tout va très bien",
+      "location": "Même salle · 16 h 15",
+      "skill": "Interprétation",
+      "points": 1,
+      "prompt": "Que répond Adam ?",
+      "intro": [
+        {
+          "speaker": "Narrateur",
+          "text": "Lina ouvre les diapositives. Le groupe reprend le travail, mais la tension reste perceptible."
+        },
+        {
+          "speaker": "Lina",
+          "text": "Il manque les sources sur ta diapo, Adam. On peut la revoir ensemble ?"
+        }
+      ],
+      "choices": {
+        "A": {
+          "text": "Oui, bien sûr. Tout est parfait… [Il lève les yeux au ciel.]",
+          "branch": [
+            { "speaker": "Adam", "text": "Oui, bien sûr. Tout est parfait…" },
+            {
+              "speaker": "Narrateur",
+              "text": "Il lève les yeux au ciel et repousse légèrement l'ordinateur."
+            }
+          ],
+          "analysis": {
+            "question": "Au-delà des mots, que communique surtout cette réplique ?",
+            "answers": [
+              "Un accord enthousiaste",
+              "Un désaccord malgré les mots d'accord",
+              "Aucun message identifiable"
+            ],
+            "correct": 2,
+            "label": "Les mots disent oui. Le geste dit non.",
+            "axioms": [4],
+            "explanation": "Le mode digital (les mots) et le mode analogique (regard, ton, geste) se contredisent. La scène suggère de l'irritation."
+          }
+        },
+        "B": {
+          "text": "On peut revoir la diapo, mais pas si vous me traitez comme un débutant.",
+          "branch": [
+            {
+              "speaker": "Adam",
+              "text": "On peut revoir la diapo, mais pas si vous me traitez comme un débutant."
+            },
+            {
+              "speaker": "Lina",
+              "text": "Je propose de vérifier les sources, pas de juger tes compétences."
+            }
+          ],
+          "analysis": {
+            "question": "Qu'est-ce qui est principalement contesté par Adam ?",
+            "answers": [
+              "Le nombre de sources demandé",
+              "La durée de l'exposé",
+              "La place qu'il pense avoir dans le groupe"
+            ],
+            "correct": 3,
+            "label": "Une proposition, deux lectures",
+            "axioms": [2],
+            "explanation": "Adam interprète la proposition comme un jugement sur sa place et ses compétences. Le désaccord porte surtout sur la relation."
+          }
+        },
+        "C": {
+          "text": "Adam ferme son carnet sans répondre.",
+          "branch": [
+            {
+              "speaker": "Narrateur",
+              "text": "Adam ferme son carnet et recule sa chaise, sans prononcer un mot."
+            },
+            {
+              "speaker": "Lina",
+              "text": "J'ai l'impression que tu préfères qu'on s'arrête."
+            }
+          ],
+          "analysis": {
+            "question": "Quelle lecture de ce silence est la plus défendable ?",
+            "answers": [
+              "Il peut être reçu comme un retrait",
+              "Il supprime toute communication",
+              "Il prouve un accord explicite"
+            ],
+            "correct": 1,
+            "label": "Un retrait qui devient message",
+            "axioms": [1],
+            "explanation": "Lina donne un sens au retrait d'Adam. Sans conclure à son intention exacte, ses gestes et son silence communiquent."
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Qui tient le clavier ?",
+      "location": "Même salle · 16 h 22",
+      "skill": "Classification",
+      "points": 1,
+      "prompt": "Que répond Adam ?",
+      "intro": [
+        {
+          "speaker": "Narrateur",
+          "text": "Les sources sont ajoutées. Il reste à répartir les prises de parole et à répéter."
+        },
+        {
+          "speaker": "Nora",
+          "text": "Il nous reste vingt minutes. Comment on s'organise ?"
+        }
+      ],
+      "choices": {
+        "A": {
+          "text": "Si tu décides de tout, je vais décider de ma partie aussi.",
+          "branch": [
+            {
+              "speaker": "Adam",
+              "text": "Si tu décides de tout, je vais décider de ma partie aussi."
+            },
+            {
+              "speaker": "Nora",
+              "text": "Alors je ne te laisse plus modifier la mienne."
+            },
+            {
+              "speaker": "Adam",
+              "text": "Dans ce cas, tu ne touches plus à la mienne non plus."
+            }
+          ],
+          "analysis": {
+            "question": "Comment classer cette escalade dans l'interaction ?",
+            "answers": [
+              "Symétrique : chacun renchérit",
+              "Complémentaire : les rôles sont acceptés",
+              "Aucune interaction"
+            ],
+            "correct": 1,
+            "label": "Une escalade symétrique",
+            "axioms": [5],
+            "explanation": "Les deux partenaires cherchent une position équivalente et répondent par une surenchère. C'est une interaction symétrique compétitive."
+          }
+        },
+        "B": {
+          "text": "Tu coordonnes la répétition ; je vérifie les sources.",
+          "branch": [
+            {
+              "speaker": "Adam",
+              "text": "Tu coordonnes la répétition ; je vérifie les sources."
+            },
+            {
+              "speaker": "Nora",
+              "text": "D'accord. Je répartis les passages et tu nous signales les corrections."
+            },
+            { "speaker": "Adam", "text": "Ça me va." }
+          ],
+          "analysis": {
+            "question": "Quel type d'organisation est accepté ici ?",
+            "answers": [
+              "Symétrique : chacun tente de dominer",
+              "Complémentaire : les positions sont différentes",
+              "Une rupture de communication"
+            ],
+            "correct": 2,
+            "label": "Des rôles qui se complètent",
+            "axioms": [5],
+            "explanation": "Nora coordonne et Adam vérifie. Ils acceptent des positions différentes et ajustées l'une à l'autre : interaction complémentaire."
+          }
+        },
+        "C": {
+          "text": "Je reprends le clavier parce que tu corriges tout ce que je fais.",
+          "branch": [
+            {
+              "speaker": "Adam",
+              "text": "Je reprends le clavier parce que tu corriges tout ce que je fais."
+            },
+            {
+              "speaker": "Nora",
+              "text": "Je corrige parce que tu changes les choses sans prévenir."
+            }
+          ],
+          "analysis": {
+            "question": "Quel mécanisme entretient principalement la tension ?",
+            "answers": [
+              "Une contradiction entre mots et gestes",
+              "Des rôles complémentaires acceptés",
+              "Chacun présente son acte comme une réaction"
+            ],
+            "correct": 3,
+            "label": "La boucle se referme",
+            "axioms": [3],
+            "explanation": "Adam et Nora découpent la même séquence différemment. Chacun attribue à l'autre l'origine du problème : ponctuation des séquences."
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Changer la boucle",
+      "location": "Avant la répétition · 16 h 28",
+      "skill": "Diagnostic final",
+      "points": 2,
+      "prompt": "Que répond Adam ?",
+      "intro": [
+        {
+          "speaker": "Narrateur",
+          "text": "L'exposé est presque prêt. Lina pose le minuteur au milieu de la table."
+        },
+        {
+          "speaker": "Lina",
+          "text": "Depuis tout à l'heure, on entend des reproches là où d'autres pensent aider. On peut regarder ce qui se passe entre nous ?"
+        }
+      ],
+      "choices": {
+        "A": {
+          "text": "Je pensais me protéger en me taisant. Vous avez entendu du désintérêt.",
+          "branch": [
+            {
+              "speaker": "Adam",
+              "text": "Je pensais me protéger en me taisant. Vous avez entendu du désintérêt."
+            },
+            {
+              "speaker": "Nora",
+              "text": "Et je pensais aider en relançant. Tu as entendu un ordre."
+            }
+          ],
+          "analysis": {
+            "question": "Quel diagnostic relie le mieux les échanges observés ?",
+            "answers": [
+              "Il suffisait d'ajouter davantage de mots",
+              "Les comportements sont interprétés et modifient la relation",
+              "Seul le contenu des diapositives explique la tension"
+            ],
+            "correct": 2,
+            "label": "Le message dépasse les mots",
+            "axioms": [1, 2, 3],
+            "explanation": "Silence et relances reçoivent un sens relationnel. Ces interprétations nourrissent les réactions réciproques ; parler de cette boucle permet de la rendre visible."
+          }
+        },
+        "B": {
+          "text": "On réagit chacun à l'autre. Et si on arrêtait de chercher qui a commencé ?",
+          "branch": [
+            {
+              "speaker": "Adam",
+              "text": "On réagit chacun à l'autre. Et si on arrêtait de chercher qui a commencé ?"
+            },
+            {
+              "speaker": "Nora",
+              "text": "D'accord. On décrit ce dont on a besoin pour finir, sans se donner des ordres."
+            }
+          ],
+          "analysis": {
+            "question": "Quelle analyse globale explique le mieux le changement proposé ?",
+            "answers": [
+              "Reconnaître la boucle et négocier la relation peut changer l'échange",
+              "Une seule personne est toujours la cause de toute la séquence",
+              "Le ton n'a aucun effet si les mots sont précis"
+            ],
+            "correct": 1,
+            "label": "Observer la boucle pour la modifier",
+            "axioms": [2, 3],
+            "explanation": "Le groupe abandonne la recherche d'un début unique et parle de sa manière d'interagir. Ponctuation et relation deviennent des objets de discussion."
+          }
+        },
+        "C": {
+          "text": "Vous me dites que tout va bien, mais vos regards me font penser l'inverse.",
+          "branch": [
+            {
+              "speaker": "Adam",
+              "text": "Vous me dites que tout va bien, mais vos regards me font penser l'inverse."
+            },
+            {
+              "speaker": "Lina",
+              "text": "Alors vérifions nos interprétations au lieu de les laisser devenir des reproches."
+            }
+          ],
+          "analysis": {
+            "question": "Quel diagnostic tient compte de l'ensemble de la conversation ?",
+            "answers": [
+              "Les gestes donnent toujours l'intention exacte",
+              "Les mots suffisent à garantir un accord",
+              "Mots, signes non verbaux et relation orientent les interprétations"
+            ],
+            "correct": 3,
+            "label": "Vérifier plutôt que supposer",
+            "axioms": [1, 2, 4],
+            "explanation": "Le groupe combine les modes digital et analogique dans un contexte relationnel. Vérifier le sens attribué aux signes aide à éviter que les suppositions entretiennent la tension."
+          }
+        }
+      }
+    }
+  ]
+}
